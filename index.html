@@ -1,0 +1,1152 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#080807">
+<title>NEON DRAW | BLACK GOLD</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+:root{
+ --bg:#080807;
+ --panel:#11110e;
+ --panel2:#191811;
+ --gold:#d6ad55;
+ --gold2:#ffe7a0;
+ --gold3:#8d6828;
+ --white:#f5f0e5;
+ --muted:#928b7a;
+ --green:#70e6ad;
+ --red:#ff6565;
+ --line:rgba(214,173,85,.19);
+ --glow:0 0 24px rgba(214,173,85,.23);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Cairo,sans-serif;-webkit-tap-highlight-color:transparent}
+body{
+ background:var(--bg);color:var(--white);height:100dvh;overflow:hidden;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled,input:disabled{opacity:.45;cursor:not-allowed}
+#particles{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.ambient{
+ position:fixed;inset:0;pointer-events:none;z-index:0;
+ background:
+ radial-gradient(ellipse at 10% 15%,rgba(214,173,85,.11),transparent 36%),
+ radial-gradient(ellipse at 90% 80%,rgba(214,173,85,.07),transparent 35%),
+ linear-gradient(145deg,#080807,#11100b 55%,#080807);
+}
+.ambient:after{
+ content:"";position:absolute;inset:0;opacity:.16;
+ background-image:linear-gradient(rgba(214,173,85,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(214,173,85,.07) 1px,transparent 1px);
+ background-size:48px 48px;
+ mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+.screen{display:none;position:relative;z-index:2;height:100dvh;width:100%;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.screen.active{display:flex}
+.panel{
+ width:100%;max-width:440px;position:relative;overflow:hidden;
+ border:1px solid var(--line);border-radius:24px;
+ background:linear-gradient(145deg,rgba(27,26,20,.96),rgba(12,12,10,.96));
+ box-shadow:0 25px 80px #000b,0 0 35px rgba(214,173,85,.07),inset 0 1px rgba(255,255,255,.045);
+ padding:28px;
+ animation:panelIn .55s cubic-bezier(.2,.8,.2,1);
+}
+.panel:before{
+ content:"";position:absolute;top:0;left:-80%;width:60%;height:1px;
+ background:linear-gradient(90deg,transparent,var(--gold2),transparent);
+ animation:shine 6s infinite;
+}
+@keyframes shine{0%{left:-80%}45%,100%{left:140%}}
+@keyframes panelIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.crown{
+ width:49px;height:49px;border-radius:15px;display:grid;place-items:center;
+ color:#17130a;font-size:25px;
+ background:linear-gradient(145deg,#fff0b4,#d4a847 50%,#76521d);
+ box-shadow:0 0 25px rgba(214,173,85,.24),inset 0 1px #fff8;
+}
+.logo{
+ font-size:clamp(28px,8vw,39px);font-weight:900;letter-spacing:1px;
+ color:var(--gold2);text-shadow:0 0 22px rgba(214,173,85,.28);
+}
+.logo span{color:#fff}
+.subtitle{color:var(--muted);font-size:12px;letter-spacing:3px;text-align:center;margin:5px 0 24px}
+.gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px 0}
+.eyebrow{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:2px;text-align:center}
+.section-title{text-align:center;font-size:22px;font-weight:900;margin:7px 0;color:var(--white)}
+.description{text-align:center;color:var(--muted);font-size:13px;line-height:1.9}
+.target-label{color:var(--muted);font-size:13px;text-align:center;margin-top:20px}
+.targets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.target{
+ border:1px solid var(--line);border-radius:12px;padding:10px 3px;
+ color:var(--white);background:#ffffff05;font-weight:800;transition:.2s
+}
+.target.active{background:linear-gradient(145deg,#f4d98e,#b78635);color:#17120a;border-color:var(--gold2);box-shadow:0 0 20px #d6ad5530}
+.field{
+ width:100%;background:#090907;border:1px solid #ffffff18;border-radius:13px;
+ padding:14px 15px;color:white;outline:none;margin:8px 0;text-align:center;
+ transition:.2s;
+}
+.field:focus{border-color:var(--gold);box-shadow:0 0 0 3px #d6ad5517}
+.field::placeholder{color:#777164}
+.action{
+ width:100%;border:0;border-radius:13px;padding:14px;margin-top:10px;
+ font-size:15px;font-weight:900;transition:.2s;position:relative;overflow:hidden;
+}
+.action:active{transform:scale(.97)}
+.action-gold{background:linear-gradient(110deg,#fff0b1,#d5a94e 48%,#946b28);color:#17120a;box-shadow:0 8px 24px #d6ad5523,inset 0 1px #fff9}
+.action-dark{background:#ffffff06;border:1px solid #d6ad5555;color:var(--gold2)}
+.action:hover{filter:brightness(1.12);transform:translateY(-2px)}
+.error{color:var(--red);font-size:12px;text-align:center;min-height:20px;margin-top:8px}
+.code{
+ font:900 56px monospace;letter-spacing:12px;color:var(--gold2);
+ text-shadow:0 0 25px #d6ad5577;text-align:center;margin:25px 0;
+}
+.wait-orbit{width:58px;height:58px;border:2px solid #d6ad5530;border-top-color:var(--gold2);border-radius:50%;margin:20px auto;animation:spin 1.3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* GAME */
+#game{display:none;position:relative;z-index:2;height:100dvh;width:100%;flex-direction:column;overflow:hidden}
+#game.active{display:flex}
+.game-top{
+ min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:9px 15px;background:linear-gradient(90deg,#0c0b08f5,#19160ef5,#0c0b08f5);
+ border-bottom:1px solid var(--line);position:relative;z-index:2;
+}
+.mini-brand{font-size:14px;font-weight:900;color:var(--gold2);white-space:nowrap}
+.mini-brand small{display:block;font-size:8px;letter-spacing:2px;color:var(--muted)}
+.scoreboard{display:flex;align-items:center;gap:13px}
+.score{
+ text-align:center;min-width:57px;padding:3px 8px;border:1px solid #d6ad5520;
+ background:#ffffff04;border-radius:11px;position:relative
+}
+.score small{font-size:10px;color:var(--muted);display:block}
+.score strong{font-size:22px;color:var(--gold2);line-height:1.3}
+.vs{font-size:10px;color:var(--gold3);font-weight:900}
+.warn{position:absolute;top:-10px;right:-5px;font-size:10px;white-space:nowrap}
+.round-info{font-size:10px;color:var(--gold);text-align:left;white-space:nowrap}
+.timer-wrap{height:5px;background:#ffffff0b;flex-shrink:0}
+.timer-bar{height:100%;width:100%;background:linear-gradient(90deg,#8d6828,#ffe7a0);box-shadow:0 0 13px #d6ad5588;transition:width .5s linear}
+.timer-bar.danger{background:linear-gradient(90deg,#ff3b3b,#ff9c60);box-shadow:0 0 12px #ff444488}
+.game-word{
+ text-align:center;padding:8px;background:linear-gradient(90deg,transparent,#d6ad550c,transparent);
+ color:var(--gold2);font-size:18px;font-weight:900;letter-spacing:2px;flex-shrink:0;
+}
+.game-word small{display:block;color:var(--muted);font-size:9px;letter-spacing:1px}
+.play-area{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 10px 5px;gap:7px}
+.board-frame{
+ flex:1;min-height:0;position:relative;padding:5px;border-radius:17px;
+ background:linear-gradient(135deg,#e4c476,#75531d 30%,#d7b45d 65%,#5e421b);
+ box-shadow:0 0 25px #d6ad5518,0 12px 30px #0008;
+}
+.board-inner{height:100%;width:100%;border-radius:13px;overflow:hidden;background:#fff;position:relative}
+#drawing-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.board-label{
+ position:absolute;top:11px;left:12px;background:#0c0b09d9;color:#d9bb79;
+ border:1px solid #d6ad5544;border-radius:7px;padding:4px 8px;font-size:9px;pointer-events:none
+}
+.tools{
+ display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+ padding:8px 6px;border:1px solid var(--line);border-radius:13px;
+ background:linear-gradient(90deg,#14130f,#1b1912,#14130f);flex-shrink:0
+}
+.tool{
+ height:34px;min-width:35px;padding:0 10px;border:1px solid #ffffff15;
+ border-radius:9px;color:var(--white);background:#ffffff08;font-size:11px;font-weight:800;
+}
+.tool.active{border-color:var(--gold);background:#d6ad5522;color:var(--gold2);box-shadow:0 0 12px #d6ad5522}
+.color{
+ width:23px;height:23px;border-radius:50%;border:2px solid #ffffff44;
+ box-shadow:0 2px 6px #0008;flex-shrink:0
+}
+.color.active{outline:2px solid var(--gold2);outline-offset:2px;transform:scale(1.12)}
+.brush-size{width:65px;accent-color:var(--gold)}
+.chat{
+ height:clamp(135px,25dvh,205px);flex-shrink:0;border-top:1px solid var(--line);
+ background:linear-gradient(180deg,#11100cf5,#090907);
+ display:flex;flex-direction:column;
+}
+.chat-head{display:flex;justify-content:space-between;padding:5px 12px;color:var(--gold);font-size:10px;font-weight:800}
+.messages{flex:1;overflow-y:auto;padding:5px 10px;display:flex;flex-direction:column;gap:5px}
+.msg{max-width:85%;align-self:flex-start;padding:5px 10px;border-radius:10px;background:#ffffff0c;color:#eee;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.msg.mine{align-self:flex-end;background:#d6ad551c;border:1px solid #d6ad552a;color:#ffe6a3}
+.msg.correct{align-self:center;background:#153d2a;color:#8bffbc;border:1px solid #70e6ad66}
+.msg.system{align-self:center;background:transparent;color:var(--gold);font-size:10px}
+.guess-row{display:flex;gap:7px;padding:7px 9px;border-top:1px solid #ffffff0b}
+.guess-row .field{margin:0;padding:9px 12px;text-align:right;font-size:13px}
+.guess-row button{width:85px;flex-shrink:0;margin:0;padding:8px;font-size:12px}
+.waiting-turn{font-size:11px;color:var(--muted);text-align:center;padding:8px}
+.modal{
+ display:none;position:fixed;inset:0;z-index:20;background:#000d;backdrop-filter:blur(12px);
+ align-items:center;justify-content:center;padding:18px
+}
+.modal.active{display:flex}
+.modal-card{
+ width:100%;max-width:390px;text-align:center;padding:30px 24px;
+ background:linear-gradient(145deg,#211c10,#0d0c09);border:1px solid var(--gold);
+ border-radius:22px;box-shadow:0 0 60px #d6ad5520,0 25px 80px #000;
+ animation:panelIn .4s ease
+}
+.modal-icon{font-size:54px;margin-bottom:8px;filter:drop-shadow(0 0 16px #d6ad5588)}
+.modal-card h2{color:var(--gold2);font-size:26px;margin-bottom:10px}
+.modal-card p{white-space:pre-line;color:#c7c0af;font-size:13px;line-height:2;margin-bottom:15px}
+.hidden{display:none!important}
+@media(max-width:600px){
+ .screen{padding:13px}
+ .panel{padding:24px 18px}
+ .game-top{padding:7px 9px;min-height:68px}
+ .mini-brand{font-size:11px}
+ .scoreboard{gap:7px}
+ .score{min-width:49px;padding:2px 5px}
+ .score strong{font-size:19px}
+ .round-info{font-size:9px}
+ .play-area{padding:6px 6px 4px}
+ .tools{gap:7px;padding:7px 3px}
+ .tool{height:31px;padding:0 8px;font-size:10px}
+ .color{width:21px;height:21px}
+ .chat{height:clamp(130px,24dvh,190px)}
+}
+</style>
+</head>
+
+<body>
+<div class="ambient"></div>
+<canvas id="particles"></canvas>
+
+<section id="home" class="screen active">
+ <div class="panel">
+  <div class="brand">
+   <div class="crown">♛</div>
+   <div class="logo">NEON<span> DRAW</span></div>
+  </div>
+  <div class="subtitle">BLACK GOLD • COMPETITIVE ARENA</div>
+  <div class="gold-line"></div>
+  <div class="eyebrow">CHOOSE YOUR VICTORY</div>
+  <div class="section-title">حدد هدف الفوز</div>
+  <p class="description">اجمع النقاط، ارسم بذكاء، واكسب المواجهة.</p>
+
+  <div class="targets">
+   <button class="target" onclick="setTarget(100,this)">100</button>
+   <button class="target active" onclick="setTarget(300,this)">300</button>
+   <button class="target" onclick="setTarget(500,this)">500</button>
+   <button class="target" onclick="setTarget(1000,this)">1000</button>
+  </div>
+  <input id="custom-target" class="field" type="number" min="10" max="100000" placeholder="أو اكتب هدفًا مخصصًا">
+  <button class="action action-gold" onclick="createRoom()">♛ إنشاء ساحة جديدة</button>
+  <button class="action action-dark" onclick="goJoin()">الانضمام باستخدام كود</button>
+  <div class="gold-line"></div>
+  <p class="description">PLAYER VS PLAYER • TWO PLAYER ARENA</p>
+ </div>
+</section>
+
+<section id="join" class="screen">
+ <div class="panel">
+  <div class="brand"><div class="crown">♛</div><div class="logo">JOIN<span> ARENA</span></div></div>
+  <div class="subtitle">ENTER THE ROOM CODE</div>
+  <div class="section-title">دخول الساحة</div>
+  <p class="description">أدخل رمز الغرفة الذي أرسله لك صديقك.</p>
+  <input id="join-code" class="field" inputmode="numeric" maxlength="4" placeholder="0000">
+  <button id="join-btn" class="action action-gold" onclick="joinRoom()">دخول المواجهة</button>
+  <button class="action action-dark" onclick="showScreen('home')">رجوع</button>
+  <div id="join-error" class="error"></div>
+ </div>
+</section>
+
+<section id="waiting" class="screen">
+ <div class="panel">
+  <div class="brand"><div class="crown">♛</div><div class="logo">YOUR<span> ARENA</span></div></div>
+  <div class="subtitle">PRIVATE MATCH CREATED</div>
+  <div class="section-title">الساحة جاهزة</div>
+  <p class="description">شارك الكود مع صديقك لبدء المواجهة.</p>
+  <div id="room-code" class="code">----</div>
+  <div class="wait-orbit"></div>
+  <p class="description">بانتظار اللاعب الثاني...</p>
+  <button class="action action-dark" onclick="cancelRoom()">إلغاء الغرفة</button>
+ </div>
+</section>
+
+<main id="game">
+ <header class="game-top">
+  <div class="mini-brand">♛ NEON DRAW<small>BLACK GOLD ARENA</small></div>
+  <div class="scoreboard">
+   <div class="score">
+    <small>أنت</small><strong id="my-score">0</strong>
+    <span class="warn" id="my-warnings"></span>
+   </div>
+   <div class="vs">VS</div>
+   <div class="score">
+    <small>الخصم</small><strong id="opp-score">0</strong>
+    <span class="warn" id="opp-warnings"></span>
+   </div>
+  </div>
+  <div id="round-info" class="round-info">الهدف<br>300</div>
+ </header>
+
+ <div class="timer-wrap"><div id="timer-bar" class="timer-bar"></div></div>
+ <div class="game-word"><small id="role-label">دورك</small><span id="word-display">---</span></div>
+
+ <section class="play-area">
+  <div class="board-frame">
+   <div class="board-inner">
+    <canvas id="drawing-canvas" width="1000" height="700"></canvas>
+   </div>
+   <div class="board-label">ROYAL CANVAS • LIVE</div>
+  </div>
+
+  <div id="drawer-tools" class="tools hidden">
+   <button class="tool active" id="pen-tool" onclick="setTool('pen')">✎ قلم</button>
+   <button class="tool" id="eraser-tool" onclick="setTool('eraser')">⌫ ممحاة</button>
+   <span class="color active" data-color="#171717" style="background:#171717" onclick="setColor('#171717',this)"></span>
+   <span class="color" data-color="#d6ad55" style="background:#d6ad55" onclick="setColor('#d6ad55',this)"></span>
+   <span class="color" data-color="#e53935" style="background:#e53935" onclick="setColor('#e53935',this)"></span>
+   <span class="color" data-color="#1976d2" style="background:#1976d2" onclick="setColor('#1976d2',this)"></span>
+   <span class="color" data-color="#2e9d62" style="background:#2e9d62" onclick="setColor('#2e9d62',this)"></span>
+   <span class="color" data-color="#9c45bd" style="background:#9c45bd" onclick="setColor('#9c45bd',this)"></span>
+   <input id="brush-size" class="brush-size" type="range" min="2" max="30" value="5" aria-label="حجم الفرشاة">
+   <button class="tool" onclick="clearBoard()">مسح اللوحة</button>
+  </div>
+ </section>
+
+ <section class="chat">
+  <div class="chat-head">
+   <span>◈ ساحة التخمين</span>
+   <span id="guesses-left">المحاولات: 3</span>
+  </div>
+  <div id="messages" class="messages"></div>
+  <div id="guess-area" class="guess-row">
+   <input id="guess-input" class="field" placeholder="ما الذي ترسمه؟" autocomplete="off">
+   <button class="action action-gold" onclick="sendGuess()">إرسال</button>
+  </div>
+  <div id="drawer-message" class="waiting-turn hidden">أنت الرسام الآن — ارسم الكلمة ولا تكشفها!</div>
+ </section>
+</main>
+
+<div id="result-modal" class="modal">
+ <div class="modal-card">
+  <div id="result-icon" class="modal-icon">♛</div>
+  <h2 id="result-title">انتهت الجولة</h2>
+  <p id="result-desc"></p>
+  <button id="next-round" class="action action-gold" onclick="startNewRound()">الجولة التالية</button>
+  <button id="back-home" class="action action-dark hidden" onclick="location.reload()">العودة للرئيسية</button>
+ </div>
+</div>
+
+<script>
+/* FIREBASE */
+const firebaseConfig = {
+ apiKey:"AIzaSyD7WYn9T1-r2NlF-kMcuQWN07T5wxQRcbw",
+ authDomain:"ddmm-d24cf.firebaseapp.com",
+ databaseURL:"https://ddmm-d24cf-default-rtdb.firebaseio.com",
+ projectId:"ddmm-d24cf",
+ storageBucket:"ddmm-d24cf.firebasestorage.app",
+ messagingSenderId:"1070949465971",
+ appId:"1:1070949465971:web:ca001b27495aaa984b4f06"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+const WORDS=[
+"تفاحة","سيارة","شمس","قمر","بيت","شجرة","كتاب","قهوة","بحر","ساعة",
+"موبايل","كرسي","قلم","قطة","كلب","طيار","صحراء","مفتاح","نظارة","عصفور",
+"مدرسة","مستشفى","تليفزيون","مطبخ","حمام","فيل","زرافة","أسد","نمر","دب",
+"بطة","فراولة","برتقال","ليمون","عنب","بطيخ","مظلة","حقيبة","سكين","شوكة",
+"ملعقة","طبق","كوب","سجادة","سرير","مروحة","لمبة","مقص","دبوس","خيط",
+"طائرة","سفينة","قطار","دراجة","ساعة رملية","تاج","قلعة","جبل","شلال","نخلة",
+"فراشة","نحلة","سلحفاة","تمساح","حصان","أرنب","ذئب","ثعلب","حوت","دلفين"
+];
+
+const SYNONYMS=[
+ ["بيت","منزل","دار"],["سيارة","عربية","مركبة"],
+ ["موبايل","هاتف","جوال","تليفون"],["قهوة","بن"],
+ ["مستشفى","مشفى"],["تليفزيون","تلفزيون","شاشة"],
+ ["حقيبة","شنطة"],["مظلة","شمسية"],["كرسي","مقعد"],
+ ["أسد","ليث"],["قطة","بسة"],["تفاحة","تفاح"],
+ ["برتقالة","برتقال"],["فراولة","فراوله"],["بطيخة","بطيخ"],
+ ["عصفور","طائر"],["لمبة","مصباح"],["سرير","فراش"],
+ ["كوب","كأس"],["نظارة","نضارة"],["دراجة","عجلة"],
+ ["طائرة","طيارة"]
+];
+
+const ROUND_TIME=60;
+let target=300,roomRef=null,role=null,roomCode=null;
+let gameState=null,timer=null,roomListener=null,chatListener=null,drawingListener=null;
+let canvas,ctx,painting=false,lastPoint=null,currentColor="#171717",tool="pen";
+let lastRoundKey=null,joining=false,leaving=false;
+
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+ document.getElementById("game").classList.remove("active");
+ document.getElementById(id).classList.add("active");
+}
+
+function setTarget(n,el){
+ target=n;
+ document.querySelectorAll(".target").forEach(x=>x.classList.remove("active"));
+ el.classList.add("active");
+ document.getElementById("custom-target").value="";
+}
+
+function goJoin(){
+ document.getElementById("join-error").textContent="";
+ showScreen("join");
+}
+
+function makeCode(){
+ return String(Math.floor(1000+Math.random()*9000));
+}
+
+function normalizeText(s){
+ return String(s||"").toLowerCase().trim()
+ .replace(/[\u064B-\u065F\u0670]/g,"")
+ .replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي")
+ .replace(/[ؤئ]/g,"ء").replace(/ة/g,"ه")
+ .replace(/ـ/g,"").replace(/[^\u0621-\u064A0-9a-z]/g,"");
+}
+
+function variants(s){
+ let n=normalizeText(s),v=new Set([n]);
+ if(n.startsWith("ال")&&n.length>3)v.add(n.slice(2));
+ if(n.endsWith("ات")&&n.length>4)v.add(n.slice(0,-2));
+ if(n.endsWith("ين")&&n.length>4)v.add(n.slice(0,-2));
+ if(n.endsWith("ون")&&n.length>4)v.add(n.slice(0,-2));
+ return v;
+}
+
+function isCorrectGuess(guess,answer){
+ const g=variants(guess),a=variants(answer);
+ for(const x of g)if(a.has(x)&&x.length>=2)return true;
+ for(const group of SYNONYMS){
+  const words=group.map(normalizeText);
+  if(words.some(x=>[...g].some(y=>x===y))&&words.some(x=>[...a].some(y=>x===y)))return true;
+ }
+ return false;
+}
+
+function uniqueWord(used){
+ let options=WORDS.filter(w=>!(used||[]).includes(w));
+ if(!options.length)options=WORDS;
+ const word=options[Math.floor(Math.random()*options.length)];
+ return {word,used:[...(used||[]).filter(w=>WORDS.includes(w)),word]};
+}
+
+function systemMessage(text){
+ if(!roomRef)return;
+ roomRef.child("chat").push({sender:"system",text,isSystem:true,createdAt:Date.now()});
+}
+
+/* CREATE ROOM */
+async function createRoom(){
+ const custom=parseInt(document.getElementById("custom-target").value,10);
+ const chosen=custom>0?Math.min(custom,100000):target;
+
+ let code=makeCode();
+ let first=uniqueWord([]);
+
+ role="host";
+ roomCode=code;
+ roomRef=db.ref("draw-rooms/"+code);
+
+ document.getElementById("room-code").textContent=code;
+ showScreen("waiting");
+
+ try{
+  // التأكد من أن الرمز غير مستخدم قبل إنشاء الغرفة
+  let existing=await roomRef.once("value");
+  let attempts=0;
+
+  while(existing.exists() && attempts<10){
+   code=makeCode();
+   roomCode=code;
+   roomRef=db.ref("draw-rooms/"+code);
+   existing=await roomRef.once("value");
+   attempts++;
+  }
+
+  if(existing.exists()){
+   throw new Error("تعذر إنشاء رمز غرفة متاح. حاول مرة أخرى.");
+  }
+
+  document.getElementById("room-code").textContent=code;
+
+  await roomRef.set({
+   host:true,
+   guest:false,
+   status:"waiting",
+   currentDrawer:"host",
+   word:first.word,
+   usedWords:first.used,
+   targetScore:chosen,
+   scoreHost:0,
+   scoreGuest:0,
+   warningsHost:0,
+   warningsGuest:0,
+   guessesHost:3,
+   guessesGuest:3,
+   startTime:Date.now(),
+   drawingData:null
+  });
+
+  attachRoom();
+  attachChat();
+
+ }catch(e){
+  console.error("CREATE ERROR:",e);
+  alert("تعذر إنشاء الغرفة: "+(e.message||"راجع اتصال الإنترنت وقواعد Firebase."));
+  showScreen("home");
+ }
+}
+
+/* JOIN ROOM - FIXED */
+async function joinRoom(){
+ if(joining)return;
+
+ const code=document.getElementById("join-code").value
+   .replace(/\D/g,"")
+   .trim();
+
+ const error=document.getElementById("join-error");
+ const btn=document.getElementById("join-btn");
+
+ if(!/^\d{4}$/.test(code)){
+  error.textContent="اكتب كودًا صحيحًا مكونًا من 4 أرقام.";
+  return;
+ }
+
+ joining=true;
+ btn.disabled=true;
+ btn.textContent="جاري التحقق من الغرفة...";
+ error.textContent="";
+
+ const candidateRef=db.ref("draw-rooms/"+code);
+
+ try{
+  // قراءة الغرفة أولًا لتحديد سبب المشكلة
+  const snapshot=await candidateRef.once("value");
+  const data=snapshot.val();
+
+  if(!data){
+   error.textContent="هذا الكود غير موجود. تأكد من الرمز أو اطلب كودًا جديدًا.";
+   return;
+  }
+
+  if(data.guest===true){
+   error.textContent="الغرفة مكتملة بالفعل.";
+   return;
+  }
+
+  // نقبل الغرفة إذا كانت waiting أو لم يكن لها status قديمًا
+  if(data.status && data.status!=="waiting"){
+   error.textContent="اللعبة بدأت بالفعل، لا يمكن الانضمام الآن.";
+   return;
+  }
+
+  // الحجز النهائي باستخدام Transaction لمنع دخول لاعبين معًا
+  const result=await candidateRef.transaction(current=>{
+   if(!current)return;
+
+   if(current.guest===true)return;
+
+   if(current.status && current.status!=="waiting")return;
+
+   current.guest=true;
+   current.status="playing";
+   current.startTime=Date.now();
+
+   return current;
+  });
+
+  if(!result.committed){
+   const latest=await candidateRef.once("value");
+   const latestData=latest.val();
+
+   if(!latestData){
+    error.textContent="الغرفة لم تعد موجودة.";
+   }else if(latestData.guest===true){
+    error.textContent="سبقك لاعب آخر واكتمل عدد اللاعبين.";
+   }else if(latestData.status && latestData.status!=="waiting"){
+    error.textContent="اللعبة بدأت بالفعل.";
+   }else{
+    error.textContent="تعذر حجز مكانك. حاول مرة أخرى.";
+   }
+
+   return;
+  }
+
+  role="guest";
+  roomCode=code;
+  roomRef=candidateRef;
+
+  attachRoom();
+  attachChat();
+
+ }catch(e){
+  console.error("JOIN ERROR:",e);
+
+  if(e.code==="PERMISSION_DENIED"){
+   error.textContent="Firebase رفض الدخول بسبب صلاحيات قاعدة البيانات.";
+  }else{
+   error.textContent="خطأ في الاتصال: "+(e.message||"حاول مرة أخرى.");
+  }
+
+ }finally{
+  joining=false;
+  btn.disabled=false;
+  btn.textContent="دخول المواجهة";
+ }
+}
+
+/* ROOM LISTENER */
+function attachRoom(){
+ if(roomListener)roomRef.off("value",roomListener);
+
+ roomListener=snap=>{
+  const data=snap.val();
+
+  if(!data){
+   if(role==="guest"&&!leaving)alert("تم إغلاق الغرفة من صاحبها.");
+   if(!leaving)location.reload();
+   return;
+  }
+
+  gameState=data;
+  renderGame(data);
+ };
+
+ roomRef.on("value",roomListener);
+ attachDrawing();
+}
+
+/* CHAT LISTENER */
+function attachChat(){
+ const ref=roomRef.child("chat");
+
+ if(chatListener)ref.off("child_added",chatListener);
+
+ document.getElementById("messages").innerHTML="";
+
+ chatListener=snap=>{
+  const m=snap.val();
+  if(!m)return;
+
+  const box=document.getElementById("messages");
+  const div=document.createElement("div");
+
+  div.className="msg";
+
+  if(m.isSystem){
+   div.classList.add("system");
+   div.textContent=m.text;
+  }else{
+   if(m.isCorrect)div.classList.add("correct");
+   if(m.sender===role)div.classList.add("mine");
+   div.textContent=(m.sender===role?"أنت: ":"الخصم: ")+m.text;
+  }
+
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+ };
+
+ ref.on("child_added",chatListener);
+}
+
+/* DRAWING */
+function attachDrawing(){
+ const ref=roomRef.child("drawingData");
+
+ if(drawingListener)ref.off("value",drawingListener);
+
+ drawingListener=snap=>{
+  const data=snap.val()||{};
+  redrawBoard(data);
+ };
+
+ ref.on("value",drawingListener);
+}
+
+function initCanvas(){
+ canvas=document.getElementById("drawing-canvas");
+ ctx=canvas.getContext("2d");
+ ctx.lineCap="round";
+ ctx.lineJoin="round";
+
+ canvas.addEventListener("pointerdown",startStroke);
+ canvas.addEventListener("pointermove",moveStroke);
+ canvas.addEventListener("pointerup",endStroke);
+ canvas.addEventListener("pointercancel",endStroke);
+ canvas.addEventListener("pointerleave",endStroke);
+}
+
+function redrawBoard(data){
+ if(!ctx)return;
+
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ Object.values(data).forEach(segment=>{
+  if(!segment)return;
+
+  ctx.beginPath();
+  ctx.moveTo(segment.x0,segment.y0);
+  ctx.lineTo(segment.x1,segment.y1);
+  ctx.strokeStyle=segment.color;
+  ctx.lineWidth=segment.width;
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  ctx.stroke();
+ });
+}
+
+function coords(e){
+ const r=canvas.getBoundingClientRect();
+
+ return {
+  x:(e.clientX-r.left)*canvas.width/r.width,
+  y:(e.clientY-r.top)*canvas.height/r.height
+ };
+}
+
+function startStroke(e){
+ if(!gameState||role!==gameState.currentDrawer||gameState.status!=="playing")return;
+
+ painting=true;
+ canvas.setPointerCapture(e.pointerId);
+ lastPoint=coords(e);
+}
+
+function moveStroke(e){
+ if(!painting||!lastPoint)return;
+
+ const p=coords(e);
+ const color=tool==="eraser"?"#ffffff":currentColor;
+
+ const width=tool==="eraser"
+  ?Math.max(18,+document.getElementById("brush-size").value*3)
+  :+document.getElementById("brush-size").value;
+
+ const seg={
+  x0:lastPoint.x,
+  y0:lastPoint.y,
+  x1:p.x,
+  y1:p.y,
+  color,
+  width
+ };
+
+ ctx.beginPath();
+ ctx.moveTo(seg.x0,seg.y0);
+ ctx.lineTo(seg.x1,seg.y1);
+ ctx.strokeStyle=color;
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.lineJoin="round";
+ ctx.stroke();
+
+ roomRef.child("drawingData").push(seg);
+ lastPoint=p;
+}
+
+function endStroke(){
+ painting=false;
+ lastPoint=null;
+}
+
+function setColor(color,el){
+ currentColor=color;
+ tool="pen";
+
+ document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));
+
+ if(el)el.classList.add("active");
+
+ document.getElementById("pen-tool").classList.add("active");
+ document.getElementById("eraser-tool").classList.remove("active");
+}
+
+function setTool(name){
+ tool=name;
+
+ document.getElementById("pen-tool").classList.toggle("active",name==="pen");
+ document.getElementById("eraser-tool").classList.toggle("active",name==="eraser");
+}
+
+async function clearBoard(){
+ if(!gameState||role!==gameState.currentDrawer)return;
+
+ try{
+  await roomRef.child("drawingData").remove();
+ }catch(e){
+  console.error(e);
+ }
+}
+
+/* GAME UI */
+function renderGame(d){
+ if(d.status==="waiting")return;
+
+ document.getElementById("game").classList.add("active");
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+
+ const newRound=d.startTime!==lastRoundKey;
+
+ if(newRound){
+  lastRoundKey=d.startTime;
+  clearInterval(timer);
+
+  document.getElementById("result-modal").classList.remove("active");
+  document.getElementById("timer-bar").style.width="100%";
+ }
+
+ const mine=role==="host"?"Host":"Guest";
+ const other=role==="host"?"Guest":"Host";
+
+ const myScore=d["score"+mine]||0;
+ const oppScore=d["score"+other]||0;
+ const myWarnings=d["warnings"+mine]||0;
+ const oppWarnings=d["warnings"+other]||0;
+ const myGuesses=d["guesses"+mine]??3;
+
+ document.getElementById("my-score").textContent=myScore;
+ document.getElementById("opp-score").textContent=oppScore;
+
+ document.getElementById("my-warnings").textContent="⚠".repeat(myWarnings);
+ document.getElementById("opp-warnings").textContent="⚠".repeat(oppWarnings);
+
+ document.getElementById("round-info").innerHTML="الهدف<br>"+d.targetScore;
+ document.getElementById("guesses-left").textContent="المحاولات: "+myGuesses;
+
+ const drawer=role===d.currentDrawer;
+
+ document.getElementById("role-label").textContent=drawer
+  ?"أنت الرسام — ارسم الكلمة"
+  :"خمن الرسمة";
+
+ document.getElementById("word-display").textContent=drawer?d.word:"؟؟؟";
+
+ document.getElementById("drawer-tools").classList.toggle("hidden",!drawer);
+ document.getElementById("guess-area").classList.toggle("hidden",drawer);
+ document.getElementById("drawer-message").classList.toggle("hidden",!drawer);
+
+ document.getElementById("guess-input").disabled=myGuesses<=0;
+
+ if(d.status==="playing"&&newRound)startTimer(d.startTime);
+
+ if(d.status==="roundOver"||d.status==="gameOver")showResult(d);
+}
+
+/* TIMER */
+function startTimer(startTime){
+ clearInterval(timer);
+
+ const update=()=>{
+  if(!gameState||gameState.status!=="playing")return;
+
+  const left=Math.max(0,ROUND_TIME-Math.floor((Date.now()-startTime)/1000));
+
+  document.getElementById("timer-bar").style.width=(left/ROUND_TIME*100)+"%";
+  document.getElementById("timer-bar").classList.toggle("danger",left<=10);
+
+  if(left<=0){
+   clearInterval(timer);
+   if(role==="host")finishByTime();
+  }
+ };
+
+ update();
+ timer=setInterval(update,500);
+}
+
+/* FINISH ROUND BY TIME */
+async function finishByTime(){
+ try{
+  await roomRef.transaction(d=>{
+   if(!d||d.status!=="playing")return;
+
+   const drawer=d.currentDrawer;
+   const guesser=drawer==="host"?"guest":"host";
+
+   const warningKey="warnings"+(drawer==="host"?"Host":"Guest");
+   const drawerScoreKey="score"+(drawer==="host"?"Host":"Guest");
+   const guesserScoreKey="score"+(guesser==="host"?"Host":"Guest");
+
+   let warnings=(d[warningKey]||0)+1;
+   let drawerScore=d[drawerScoreKey]||0;
+
+   let reason="انتهى الوقت! خسر المخمن 5 نقاط.";
+
+   if(warnings>=3){
+    drawerScore=Math.max(0,drawerScore-20);
+    warnings=0;
+    reason+="\nالرسام حصل على 3 إنذارات وخسر 20 نقطة.";
+   }else{
+    reason+="\nالرسام حصل على إنذار.";
+   }
+
+   d[warningKey]=warnings;
+   d[drawerScoreKey]=drawerScore;
+   d[guesserScoreKey]=Math.max(0,(d[guesserScoreKey]||0)-5);
+
+   d.status="roundOver";
+   d.winner="none";
+   d.endReason=reason;
+
+   return d;
+  });
+ }catch(e){
+  console.error(e);
+ }
+}
+
+/* GUESSING */
+async function sendGuess(){
+ const input=document.getElementById("guess-input");
+ const guess=input.value.trim();
+
+ if(!guess||!gameState||gameState.status!=="playing")return;
+ if(role===gameState.currentDrawer)return;
+
+ const key=role==="host"?"Host":"Guest";
+ const correct=isCorrectGuess(guess,gameState.word);
+
+ input.value="";
+
+ try{
+  await roomRef.child("chat").push({
+   sender:role,
+   text:guess,
+   isCorrect:correct,
+   createdAt:Date.now()
+  });
+
+  await roomRef.transaction(d=>{
+   if(!d||d.status!=="playing")return;
+   if(d.currentDrawer===role)return;
+
+   if(correct){
+    const elapsed=Math.floor((Date.now()-d.startTime)/1000);
+    const points=Math.max(10,ROUND_TIME-elapsed);
+    const scoreKey="score"+key;
+
+    d[scoreKey]=(d[scoreKey]||0)+points;
+    d.status=d[scoreKey]>=d.targetScore?"gameOver":"roundOver";
+    d.winner=role;
+
+    d.endReason=`إجابة صحيحة خلال ${elapsed} ثانية! حصلت على ${points} نقطة.`;
+
+    if(d.status==="gameOver"){
+     d.endReason+="\n🏆 وصلت إلى هدف الفوز!";
+    }
+
+   }else{
+    const guessKey="guesses"+key;
+    const scoreKey="score"+key;
+
+    d[guessKey]=Math.max(0,(d[guessKey]??3)-1);
+
+    if(d[guessKey]===0){
+     d[scoreKey]=Math.max(0,(d[scoreKey]||0)-10);
+     d.status="roundOver";
+     d.winner="none";
+     d.endReason="انتهت المحاولات الثلاث! خسرت 10 نقاط.";
+    }
+   }
+
+   return d;
+  });
+
+ }catch(e){
+  console.error(e);
+ }
+}
+
+/* ROUND RESULT */
+function showResult(d){
+ clearInterval(timer);
+
+ const modal=document.getElementById("result-modal");
+ const title=document.getElementById("result-title");
+ const desc=document.getElementById("result-desc");
+ const next=document.getElementById("next-round");
+ const back=document.getElementById("back-home");
+
+ if(d.status==="gameOver"){
+  document.getElementById("result-icon").textContent=d.winner===role?"🏆":"♛";
+
+  title.textContent=d.winner===role
+   ?"أنت ملك الساحة!"
+   :"انتهت المواجهة";
+
+  desc.textContent=(d.winner===role
+   ?"مبروك! لقد حققت الفوز.\n"
+   :"المنافس حقق الفوز.\n")
+   +d.endReason+"\n\nالكلمة: "+d.word;
+
+  next.classList.add("hidden");
+  back.classList.remove("hidden");
+
+ }else{
+  document.getElementById("result-icon").textContent=d.winner===role
+   ?"👑"
+   :d.winner==="none"?"⌛":"⚔";
+
+  title.textContent=d.winner==="none"
+   ?"انتهت الجولة"
+   :d.winner===role?"جولة رائعة!":"الجولة للمنافس";
+
+  desc.textContent=d.endReason+"\n\nالكلمة كانت: "+d.word;
+
+  back.classList.add("hidden");
+
+  next.classList.toggle("hidden",role!=="host");
+
+  if(role!=="host"){
+   desc.textContent+="\n\nبانتظار صاحب الغرفة لبدء الجولة التالية.";
+  }
+ }
+
+ modal.classList.add("active");
+}
+
+/* NEXT ROUND */
+async function startNewRound(){
+ if(role!=="host")return;
+
+ try{
+  const snap=await roomRef.once("value");
+  const d=snap.val();
+
+  if(!d||d.status!=="roundOver")return;
+
+  const nextDrawer=d.currentDrawer==="host"?"guest":"host";
+  const next=uniqueWord(d.usedWords||[]);
+
+  const result=await roomRef.transaction(current=>{
+   if(!current||current.status!=="roundOver")return;
+
+   current.status="playing";
+   current.currentDrawer=nextDrawer;
+   current.word=next.word;
+   current.usedWords=next.used;
+   current.startTime=Date.now();
+   current.guessesHost=3;
+   current.guessesGuest=3;
+   current.drawingData=null;
+   current.winner=null;
+   current.endReason=null;
+
+   return current;
+  });
+
+  if(result.committed){
+   await roomRef.child("chat").remove();
+  }
+
+ }catch(e){
+  console.error(e);
+ }
+}
+
+/* EXIT */
+async function cancelRoom(){
+ leaving=true;
+ clearInterval(timer);
+
+ try{
+  if(role==="host"&&roomRef){
+   await roomRef.remove();
+  }else if(role==="guest"&&roomRef){
+   await roomRef.update({guest:false,status:"waiting"});
+  }
+ }catch(e){
+  console.error(e);
+ }
+
+ location.reload();
+}
+
+window.addEventListener("beforeunload",()=>{
+ if(leaving||!roomRef)return;
+
+ if(role==="host"){
+  roomRef.remove();
+ }else if(role==="guest"){
+  roomRef.update({guest:false,status:"waiting"});
+ }
+});
+
+document.getElementById("guess-input").addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendGuess();
+});
+
+document.getElementById("join-code").addEventListener("input",e=>{
+ e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);
+});
+
+/* GOLD PARTICLE BACKGROUND */
+(()=>{
+ const c=document.getElementById("particles");
+ const g=c.getContext("2d");
+
+ let w,h,stars=[];
+
+ function resize(){
+  const dpr=Math.min(devicePixelRatio||1,2);
+
+  w=innerWidth;
+  h=innerHeight;
+
+  c.width=w*dpr;
+  c.height=h*dpr;
+
+  c.style.width=w+"px";
+  c.style.height=h+"px";
+
+  g.setTransform(dpr,0,0,dpr,0,0);
+
+  stars=Array.from({
+   length:Math.min(95,Math.floor(w*h/8500))
+  },()=>({
+   x:Math.random()*w,
+   y:Math.random()*h,
+   r:Math.random()*1.7+.3,
+   speed:Math.random()*.22+.05,
+   alpha:Math.random()*.55+.12,
+   phase:Math.random()*6.28
+  }));
+ }
+
+ function draw(t){
+  g.clearRect(0,0,w,h);
+
+  for(const s of stars){
+   s.y-=s.speed;
+
+   if(s.y<0){
+    s.y=h;
+    s.x=Math.random()*w;
+   }
+
+   const a=s.alpha*(.65+.35*Math.sin(t*.001+s.phase));
+
+   g.beginPath();
+   g.arc(s.x,s.y,s.r,0,Math.PI*2);
+   g.fillStyle=`rgba(224,184,97,${a})`;
+   g.fill();
+  }
+
+  requestAnimationFrame(draw);
+ }
+
+ addEventListener("resize",resize);
+ resize();
+ requestAnimationFrame(draw);
+})();
+
+initCanvas();
+</script>
+</body>
+</html>
